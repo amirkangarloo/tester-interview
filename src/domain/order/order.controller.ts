@@ -8,11 +8,13 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { DbService } from 'src/db/db.service';
 import { CreateOrderDto } from 'src/domain/order/dto';
 import { OrderService } from 'src/domain/order/order.service';
 
 @Controller({ path: 'order' })
+@ApiTags('Order')
 export class OrderController {
   constructor(
     private readonly db: DbService,

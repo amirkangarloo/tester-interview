@@ -10,8 +10,10 @@ import {
 import { UserService } from './user.service';
 import { LoginDto, RegisterDto } from 'src/domain/user/dto';
 import { DbService } from 'src/db/db.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller({ path: 'user' })
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly db: DbService,
