@@ -1,20 +1,36 @@
-import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Headers,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { RegisterDto } from 'src/domain/user/dto';
+import { LoginDto, RegisterDto } from 'src/domain/user/dto';
+import { DbService } from 'src/db/db.service';
 
 @Controller({ path: 'user' })
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly db: DbService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post('/register')
-  register(@Body() body: RegisterDto) {}
+  register(@Body() body: RegisterDto) {
+    return this.userService.register(body);
+  }
 
   @Post('/login')
-  login() {}
+  login(@Body() body: LoginDto) {
+    return this.userService.login(body);
+  }
 
   @Get()
-  getUser() {}
-
-  @Patch()
-  update() {}
+  getUser(@Headers('authorization') authorization: string) {
+    const { id } = this.db.validateUserToken(authorization);
+    return this.userService.getUser(id);
+  }
 }

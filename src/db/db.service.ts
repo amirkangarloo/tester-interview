@@ -4,10 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { LoginDto, RegisterDto, UpdateUserDto } from 'src/domain/user/dto';
+import { LoginDto, RegisterDto } from 'src/domain/user/dto';
 import { ChargeWalletDto } from 'src/domain/wallet/dto';
 
-type User = {
+export type User = {
   id: string;
   firstName: string;
   lastName: string;
@@ -16,16 +16,17 @@ type User = {
   walletBalance: number;
 };
 
-type Product = {
+export type Product = {
   id: string;
   name: string;
   price: number;
 };
 
-type Order = {
+export type Order = {
   id: string;
   user: User;
   products: Product[];
+  totalAmount: number;
 };
 
 @Injectable()
@@ -34,14 +35,16 @@ export class DbService {
 
   addUser(data: RegisterDto) {
     const id = uuidv4();
-    this.$User.set(id, {
+    const body = {
       id,
       firstName: data.firstName,
       lastName: data?.lastName ?? '',
       phoneNumber: data.phoneNumber,
       password: data.password,
       walletBalance: 0,
-    });
+    };
+    this.$User.set(id, body);
+    return body;
   }
 
   getUserById(id: string): User {
@@ -57,7 +60,7 @@ export class DbService {
     let token: string;
     this.$User.forEach((user) => {
       if (user.phoneNumber === phoneNumber && user.password === password)
-        token = `TOKEN:${user.password}`;
+        token = `TOKEN:${user.id}`;
     });
     if (!token) {
       throw new UnauthorizedException('phoneNumber or password is wrong!');
@@ -65,11 +68,12 @@ export class DbService {
     return token;
   }
 
-  updateUser(data: UpdateUserDto): User {
-    const { userId, firstName, lastName } = data;
-    const user = this.getUserById(userId);
-    user.firstName = firstName ? firstName : user.firstName;
-    user.lastName = lastName ? lastName : user.lastName;
+  validateUserToken(token: string): User {
+    const [, userId] = token.split('Bearer TOKEN:');
+    const user = this.$User.get(userId);
+    if (!user) {
+      throw new UnauthorizedException('token not valid');
+    }
     return user;
   }
 
