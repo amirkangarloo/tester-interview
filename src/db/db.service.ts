@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,8 +31,13 @@ export type Order = {
 };
 
 @Injectable()
-export class DbService {
+export class DbService implements OnModuleInit {
   private $User: Map<string, User> = new Map();
+  private $Product: Map<string, Product> = new Map();
+
+  onModuleInit() {
+    this.setProducts();
+  }
 
   addUser(data: RegisterDto) {
     const id = uuidv4();
@@ -81,5 +87,24 @@ export class DbService {
     const user = this.getUserById(data.userId);
     user.walletBalance = data.amount;
     return user;
+  }
+
+  getProducts(): Product[] {
+    const list: Product[] = [];
+    this.$Product.forEach((product) => {
+      list.push(product);
+    });
+    return list;
+  }
+
+  private setProducts() {
+    const products: Product[] = [
+      { id: uuidv4(), name: 'iphone', price: 100 },
+      { id: uuidv4(), name: 'mac', price: 200 },
+      { id: uuidv4(), name: 'air pod', price: 50 },
+    ];
+    for (const product of products) {
+      this.$Product.set(product.id, product);
+    }
   }
 }
