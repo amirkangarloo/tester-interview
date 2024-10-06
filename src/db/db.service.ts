@@ -80,7 +80,7 @@ export class DbService implements OnModuleInit {
   }
 
   validateUserToken(token: string): User {
-    const [, userId] = token.split('Bearer TOKEN:');
+    const [, userId] = token.split('TOKEN:');
     const user = this.$User.get(userId);
     if (!user) {
       throw new UnauthorizedException('token not valid');

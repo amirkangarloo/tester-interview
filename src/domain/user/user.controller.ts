@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Header,
-  Headers,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto, RegisterDto } from 'src/domain/user/dto';
 import { DbService } from 'src/db/db.service';
@@ -30,9 +22,9 @@ export class UserController {
     return this.userService.login(body);
   }
 
-  @Get()
-  getUser(@Headers('authorization') authorization: string) {
-    const { id } = this.db.validateUserToken(authorization);
+  @Get('/me')
+  getUser(@Headers('token') token: string) {
+    const { id } = this.db.validateUserToken(token);
     return this.userService.getUser(id);
   }
 }

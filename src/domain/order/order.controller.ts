@@ -22,44 +22,35 @@ export class OrderController {
   ) {}
 
   @Get()
-  getOrders(@Headers('authorization') authorization: string) {
-    this.db.validateUserToken(authorization);
+  getOrders(@Headers('token') token: string) {
+    this.db.validateUserToken(token);
     return this.orderService.getOrders();
   }
 
   @Get('/:orderId')
-  getOrder(
-    @Param('orderId') orderId: string,
-    @Headers('authorization') authorization: string,
-  ) {
-    this.db.validateUserToken(authorization);
+  getOrder(@Param('orderId') orderId: string, @Headers('token') token: string) {
+    this.db.validateUserToken(token);
     return this.orderService.getOrder(orderId);
   }
 
   @Post('')
-  createOrder(
-    @Body() body: CreateOrderDto,
-    @Headers('authorization') authorization: string,
-  ) {
-    const { id } = this.db.validateUserToken(authorization);
+  createOrder(@Body() body: CreateOrderDto, @Headers('token') token: string) {
+    const { id } = this.db.validateUserToken(token);
     return this.orderService.createOrder(id, body);
   }
 
   @Put('/:orderId/pay')
-  payOrder(
-    @Param('orderId') orderId: string,
-    @Headers('authorization') authorization: string,
-  ) {
-    this.db.validateUserToken(authorization);
+  payOrder(@Param('orderId') orderId: string, @Headers('token') token: string) {
+    this.db.validateUserToken(token);
     return this.orderService.payOrder(orderId);
   }
 
   @Delete('/:orderId')
   deleteOrder(
     @Param('orderId') orderId: string,
-    @Headers('authorization') authorization: string,
+    @Headers('token') token: string,
   ) {
-    this.db.validateUserToken(authorization);
+    this.db.validateUserToken(token);
     return this.orderService.deleteOrder(orderId);
   }
 }

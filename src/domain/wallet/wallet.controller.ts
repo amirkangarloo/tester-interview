@@ -13,11 +13,7 @@ export class WalletController {
   ) {}
 
   @Post('/charge')
-  charge(
-    @Body() body: ChargeWalletDto,
-    @Headers('authorization') authorization: string,
-  ) {
-    this.db.validateUserToken(authorization);
+  charge(@Body() body: ChargeWalletDto, @Headers('token') token: string) {
     return this.walletService.charge(body);
   }
 }

@@ -12,8 +12,8 @@ export class ProductController {
   ) {}
 
   @Get()
-  getProducts(@Headers('authorization') authorization: string) {
-    this.db.validateUserToken(authorization);
+  getProducts(@Headers('token') token: string) {
+    this.db.validateUserToken(token);
     return this.productService.getProducts();
   }
 }
