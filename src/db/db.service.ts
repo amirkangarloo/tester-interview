@@ -7,6 +7,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { LoginDto, RegisterDto } from 'src/domain/user/dto';
 import { ChargeWalletDto } from 'src/domain/wallet/dto';
+import { CreateOrderDto } from 'src/domain/order/dto';
 
 export type User = {
   id: string;
@@ -25,20 +26,23 @@ export type Product = {
 
 export type Order = {
   id: string;
-  user: User;
+  userId: string;
   products: Product[];
   totalAmount: number;
+  isPaid: boolean;
 };
 
 @Injectable()
 export class DbService implements OnModuleInit {
   private $User: Map<string, User> = new Map();
   private $Product: Map<string, Product> = new Map();
+  private $Order: Map<string, Order> = new Map();
 
   onModuleInit() {
     this.setProducts();
   }
 
+  /// User
   addUser(data: RegisterDto) {
     const id = uuidv4();
     const body = {
@@ -61,6 +65,7 @@ export class DbService implements OnModuleInit {
     return user;
   }
 
+  /// User - Token
   getUserToken(data: LoginDto): string {
     const { password, phoneNumber } = data;
     let token: string;
@@ -83,18 +88,25 @@ export class DbService implements OnModuleInit {
     return user;
   }
 
+  /// Wallet
   changeUserWallet(data: ChargeWalletDto): User {
     const user = this.getUserById(data.userId);
     user.walletBalance = data.amount;
     return user;
   }
 
+  /// Product
   getProducts(): Product[] {
     const list: Product[] = [];
     this.$Product.forEach((product) => {
       list.push(product);
     });
     return list;
+  }
+
+  private getProductById(id: string): Product {
+    const product = this.$Product.get(id);
+    return product;
   }
 
   private setProducts() {
@@ -106,5 +118,59 @@ export class DbService implements OnModuleInit {
     for (const product of products) {
       this.$Product.set(product.id, product);
     }
+  }
+
+  /// Order
+  getOrders(): Order[] {
+    const list: Order[] = [];
+    this.$Order.forEach((order) => {
+      list.push(order);
+    });
+    return list;
+  }
+
+  getOrderById(orderId: string): Order {
+    const order = this.$Order.get(orderId);
+    if (!order) {
+      throw new NotFoundException('order not found');
+    }
+    return order;
+  }
+
+  createOrder(userId: string, data: CreateOrderDto): Order {
+    const { productList } = data;
+    let totalAmount = 0;
+    const user = this.getUserById(userId);
+    const products: Product[] = [];
+    productList.forEach(({ id, count }) => {
+      const product = this.getProductById(id);
+      if (product) {
+        products.push(product);
+        totalAmount += product.price * count;
+      }
+    });
+    const msg: Order = {
+      id: uuidv4(),
+      isPaid: false,
+      products,
+      totalAmount,
+      userId,
+    };
+    this.$Order.set(msg.id, msg);
+    return msg;
+  }
+
+  paidOrder(orderId: string): Order {
+    const order = this.getOrderById(orderId);
+    if (!order.isPaid) order.isPaid = true;
+    return order;
+  }
+
+  deleteOrder(orderId: string): string {
+    const order = this.getOrderById(orderId);
+    if (!order.isPaid) {
+      this.$Order.delete(orderId);
+    }
+    return 'delete success';
   }
 }
