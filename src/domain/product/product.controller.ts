@@ -1,5 +1,5 @@
 import { Controller, Get, Headers } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DbService } from 'src/db/db.service';
 import { ProductService } from 'src/domain/product/product.service';
 
@@ -12,6 +12,7 @@ export class ProductController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'دریافت لیست محصولات' })
   getProducts(@Headers('token') token: string) {
     this.db.validateUserToken(token);
     return this.productService.getProducts();
