@@ -1,5 +1,15 @@
-import { Controller, Delete, Get, Headers, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
+import { CreateOrderDto } from 'src/domain/order/dto';
 import { OrderService } from 'src/domain/order/order.service';
 
 @Controller({ path: 'order' })
@@ -12,25 +22,42 @@ export class OrderController {
   @Get()
   getOrders(@Headers('authorization') authorization: string) {
     this.db.validateUserToken(authorization);
+    return this.orderService.getOrders();
   }
 
   @Get('/:orderId')
-  getOrder(@Headers('authorization') authorization: string) {
+  getOrder(
+    @Param('orderId') orderId: string,
+    @Headers('authorization') authorization: string,
+  ) {
     this.db.validateUserToken(authorization);
+    return this.orderService.getOrder(orderId);
   }
 
   @Post('')
-  createOrder(@Headers('authorization') authorization: string) {
-    this.db.validateUserToken(authorization);
+  createOrder(
+    @Body() body: CreateOrderDto,
+    @Headers('authorization') authorization: string,
+  ) {
+    const { id } = this.db.validateUserToken(authorization);
+    return this.orderService.createOrder(id, body);
   }
 
   @Put('/:orderId/pay')
-  payOrder(@Headers('authorization') authorization: string) {
+  payOrder(
+    @Param('orderId') orderId: string,
+    @Headers('authorization') authorization: string,
+  ) {
     this.db.validateUserToken(authorization);
+    return this.orderService.payOrder(orderId);
   }
 
   @Delete('/:orderId')
-  deleteOrder(@Headers('authorization') authorization: string) {
+  deleteOrder(
+    @Param('orderId') orderId: string,
+    @Headers('authorization') authorization: string,
+  ) {
     this.db.validateUserToken(authorization);
+    return this.orderService.deleteOrder(orderId);
   }
 }
